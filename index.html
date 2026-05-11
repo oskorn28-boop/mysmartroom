@@ -10,23 +10,23 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
   <style>
-    /* ใช้ CSS ตัวเดิมที่คุณชอบ (iPhone 17 Pro Max Theme) */
     :root { --apple-blue: #0a84ff; --apple-green: #32d74b; --apple-red: #ff453a; --apple-card-bg: rgba(28, 28, 30, 0.75); --apple-text: #f2f2f7; --apple-secondary: #8e8e93; }
     body { font-family: -apple-system, sans-serif; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-    .widget-card { background: var(--apple-card-bg); backdrop-filter: blur(30px); border-radius: 36px; padding: 40px 24px; width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+    .widget-card { background: var(--apple-card-bg); backdrop-filter: blur(30px); border-radius: 36px; padding: 40px 24px; width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
     .btn-container { display: flex; gap: 15px; margin-top: 30px; }
-    .btn { flex: 1; padding: 15px; border-radius: 18px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .btn { flex: 1; padding: 15px; border-radius: 18px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 16px; }
     .btn-on { background: var(--apple-blue); color: #fff; }
     .btn-off { background: rgba(255,69,58,0.2); color: var(--apple-red); }
-    .btn:active { transform: scale(0.9); }
-    .status { color: var(--apple-secondary); font-size: 14px; margin-top: 10px; }
+    .btn:active { transform: scale(0.92); opacity: 0.8; }
+    .status { color: var(--apple-secondary); font-size: 14px; margin-top: 10px; height: 20px; }
+    .footer { margin-top: 40px; font-size: 12px; color: #555; letter-spacing: 0.5px; }
   </style>
 </head>
 <body>
 
   <div class="widget-card">
     <div style="font-size: 50px;">❄️</div>
-    <h2 style="margin: 10px 0;">LG Air Cloud</h2>
+    <h2 style="margin: 10px 0; font-weight: 600;">LG Air Cloud</h2>
     <p class="status" id="statusText">Connecting to Cloud...</p>
     
     <div class="btn-container">
@@ -34,35 +34,48 @@
       <button class="btn btn-on" onclick="sendCloud(1)">ON</button>
     </div>
     
-    <div style="margin-top:40px; font-size:12px; color:#555;">Developed by Os.Production</div>
+    <div class="footer">Developed by Os.Production</div>
   </div>
 
   <script>
-    // --- 🚨 วาง Firebase Config ของคุณตรงนี้ 🚨 ---
+    // --- 🚨 Firebase Config พร้อมเพิ่ม databaseURL เรียบร้อยแล้ว 🚨 ---
     const firebaseConfig = {
-  apiKey: "AIzaSyCkZhb6gOjBxdemvYSOj8T5tgkVVFSERVU",
-  authDomain: "mysmartroom-1b975.firebaseapp.com",
-  projectId: "mysmartroom-1b975",
-  storageBucket: "mysmartroom-1b975.firebasestorage.app",
-  messagingSenderId: "569267507293",
-  appId: "1:569267507293:web:a67782509cbf770e25fdb4",
-  measurementId: "G-6DCQZFVV8D"
-};
+      apiKey: "AIzaSyCkZhb6gOjBxdemvYSOj8T5tgkVVFSERVU",
+      authDomain: "mysmartroom-1b975.firebaseapp.com",
+      databaseURL: "https://mysmartroom-1b975-default-rtdb.asia-southeast1.firebasedatabase.app", 
+      projectId: "mysmartroom-1b975",
+      storageBucket: "mysmartroom-1b975.firebasestorage.app",
+      messagingSenderId: "569267507293",
+      appId: "1:569267507293:web:a67782509cbf770e25fdb4"
+    };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     function sendCloud(val) {
-      db.ref('AirConStatus').set(val);
-      document.getElementById('statusText').innerText = val === 1 ? "Command: ON sent" : "Command: OFF sent";
-      document.getElementById('statusText').style.color = val === 1 ? "var(--apple-green)" : "var(--apple-red)";
+      db.ref('AirConStatus').set(val)
+        .then(() => {
+          console.log("Value set to " + val);
+        })
+        .catch((error) => {
+          console.error("Error setting value:", error);
+        });
     }
 
     // ฟังสถานะจาก Cloud แบบ Realtime เพื่ออัปเดตหน้าจอ
     db.ref('AirConStatus').on('value', (snapshot) => {
       const val = snapshot.val();
-      document.getElementById('statusText').innerText = val === 1 ? "Running (25°C)" : "Standby";
-      document.getElementById('statusText').style.color = "var(--apple-secondary)";
+      const statusText = document.getElementById('statusText');
+      if (val === 1) {
+        statusText.innerText = "Running (25°C)";
+        statusText.style.color = "var(--apple-green)";
+      } else {
+        statusText.innerText = "Standby / Off";
+        statusText.style.color = "var(--apple-red)";
+      }
+    }, (error) => {
+      document.getElementById('statusText').innerText = "Permission Denied (Check Rules)";
     });
   </script>
 </body>
