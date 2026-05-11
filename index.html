@@ -3,79 +3,184 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Smart Room Cloud</title>
+  <title>LG Smart Remote - Liquid Glass</title>
   
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
+  
   <style>
-    :root { --apple-blue: #0a84ff; --apple-green: #32d74b; --apple-red: #ff453a; --apple-card-bg: rgba(28, 28, 30, 0.75); --apple-text: #f2f2f7; --apple-secondary: #8e8e93; }
-    body { font-family: -apple-system, sans-serif; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-    .widget-card { background: var(--apple-card-bg); backdrop-filter: blur(30px); border-radius: 36px; padding: 40px 24px; width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .btn-container { display: flex; gap: 15px; margin-top: 30px; }
-    .btn { flex: 1; padding: 15px; border-radius: 18px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 16px; }
-    .btn-on { background: var(--apple-blue); color: #fff; }
-    .btn-off { background: rgba(255,69,58,0.2); color: var(--apple-red); }
-    .btn:active { transform: scale(0.92); opacity: 0.8; }
-    .status { color: var(--apple-secondary); font-size: 14px; margin-top: 10px; height: 20px; }
-    .footer { margin-top: 40px; font-size: 12px; color: #555; letter-spacing: 0.5px; }
+    /* 🌌 iOS 26 Liquid Glass Theme */
+    :root { 
+      --liquid-blue: rgba(10, 132, 255, 0.85); 
+      --liquid-glow: 0 0 25px rgba(10, 132, 255, 0.4);
+      --glass-bg: rgba(30, 30, 35, 0.25); 
+      --glass-border: rgba(255, 255, 255, 0.08); 
+      --glass-highlight: rgba(255, 255, 255, 0.18);
+    }
+    
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; 
+      margin: 0; padding: 20px; 
+      min-height: 100vh; 
+      display: flex; flex-direction: column; align-items: center; 
+      color: #fff;
+      /* 💫 Dynamic Liquid Background */
+      background: #050508;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(20, 40, 100, 0.4) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(80, 20, 60, 0.3) 0%, transparent 40%);
+      background-attachment: fixed;
+      overflow-x: hidden;
+    }
+
+    /* 💎 Liquid Glass Cards */
+    .card { 
+      background: var(--glass-bg); 
+      backdrop-filter: blur(50px) saturate(180%); 
+      -webkit-backdrop-filter: blur(50px) saturate(180%);
+      border-radius: 40px; 
+      padding: 30px; 
+      width: 100%; max-width: 360px; 
+      margin-bottom: 25px; 
+      /* Rim lighting effect */
+      border: 1px solid var(--glass-border); 
+      border-top: 1px solid var(--glass-highlight);
+      border-left: 1px solid var(--glass-highlight);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.02); 
+    }
+
+    .header-row { display: flex; justify-content: space-between; align-items: center; }
+    h2 { margin: 0; font-weight: 500; font-size: 26px; letter-spacing: 0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    
+    .temp-control { display: flex; justify-content: space-between; align-items: center; margin: 30px 0; }
+    .temp-val { font-size: 72px; font-weight: 200; text-shadow: 0 4px 20px rgba(255,255,255,0.2); }
+    
+    /* 💧 Fluid Buttons */
+    .btn-circle { 
+      width: 65px; height: 65px; border-radius: 50%; border: none; 
+      background: rgba(255,255,255,0.05); color: white; font-size: 28px; font-weight: 300;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      box-shadow: inset 0 2px 5px rgba(255,255,255,0.1), 0 10px 20px rgba(0,0,0,0.2);
+      cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .btn-circle:active { transform: scale(0.85); background: rgba(255,255,255,0.15); }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 12px; margin-top: 12px; }
+    
+    .btn-rect { 
+      padding: 18px 10px; border-radius: 20px; border: none; 
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.7); font-weight: 500; font-size: 15px;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.05);
+      cursor: pointer; transition: all 0.3s ease;
+    }
+    
+    /* 🌟 Glowing Active States */
+    .active { 
+      background: var(--liquid-blue) !important; 
+      color: #fff; 
+      box-shadow: var(--liquid-glow), inset 0 2px 5px rgba(255,255,255,0.3); 
+      transform: translateY(-2px);
+    }
+    .pwr-on { 
+      background: rgba(255, 69, 58, 0.85) !important; 
+      color: #fff;
+      box-shadow: 0 0 25px rgba(255, 69, 58, 0.4), inset 0 2px 5px rgba(255,255,255,0.3);
+    }
+
+    .label { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+    .footer { text-align: center; margin-top: 20px; font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.5px; font-weight: 400; }
   </style>
 </head>
 <body>
 
-  <div class="widget-card">
-    <div style="font-size: 50px;">❄️</div>
-    <h2 style="margin: 10px 0; font-weight: 600;">LG Air Cloud</h2>
-    <p class="status" id="statusText">Connecting to Cloud...</p>
-    
-    <div class="btn-container">
-      <button class="btn btn-off" onclick="sendCloud(0)">OFF</button>
-      <button class="btn btn-on" onclick="sendCloud(1)">ON</button>
+  <div class="card">
+    <div class="header-row">
+      <h2>LG Air</h2>
+      <button id="pwrBtn" class="btn-rect" style="padding: 12px 25px; border-radius: 25px;" onclick="setVal('Power', settings.Power ? 0 : 1)">Power</button>
     </div>
-    
-    <div class="footer">Developed by Os.Production</div>
+
+    <div class="temp-control">
+      <button class="btn-circle" onclick="adjustTemp(-1)">−</button>
+      <div class="temp-val" id="tempText">25°</div>
+      <button class="btn-circle" onclick="adjustTemp(1)">+</button>
+    </div>
   </div>
 
+  <div class="card">
+    <div class="label">Mode</div>
+    <div class="grid" style="grid-template-columns: repeat(3, 1fr);">
+      <button id="m0" class="btn-rect" onclick="setVal('Mode', 0)">Cool</button>
+      <button id="m1" class="btn-rect" onclick="setVal('Mode', 1)">Dry</button>
+      <button id="m2" class="btn-rect" onclick="setVal('Mode', 2)">Fan</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label">Fan Speed</div>
+    <div class="grid" style="grid-template-columns: repeat(4, 1fr);">
+      <button id="f0" class="btn-rect" onclick="setVal('Fan', 0)">Auto</button>
+      <button id="f1" class="btn-rect" onclick="setVal('Fan', 1)">Low</button>
+      <button id="f2" class="btn-rect" onclick="setVal('Fan', 2)">Mid</button>
+      <button id="f3" class="btn-rect" onclick="setVal('Fan', 3)">High</button>
+    </div>
+  </div>
+
+  <div class="card header-row">
+    <span class="label" style="margin:0;">Vertical Swing</span>
+    <button id="swBtn" class="btn-rect" style="padding: 12px 30px; border-radius: 20px;" onclick="setVal('Swing', settings.Swing ? 0 : 1)">OFF</button>
+  </div>
+
+  <div class="footer">Developed by Os.Production</div>
+
   <script>
-    // --- 🚨 Firebase Config พร้อมเพิ่ม databaseURL เรียบร้อยแล้ว 🚨 ---
+    // 🚨 อย่าลืมเอาค่า Firebase Config ของคุณมาวางทับตรงนี้นะครับ! 🚨
     const firebaseConfig = {
       apiKey: "AIzaSyCkZhb6gOjBxdemvYSOj8T5tgkVVFSERVU",
       authDomain: "mysmartroom-1b975.firebaseapp.com",
-      databaseURL: "https://mysmartroom-1b975-default-rtdb.asia-southeast1.firebasedatabase.app", 
+      databaseURL: "https://mysmartroom-1b975-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "mysmartroom-1b975",
       storageBucket: "mysmartroom-1b975.firebasestorage.app",
       messagingSenderId: "569267507293",
       appId: "1:569267507293:web:a67782509cbf770e25fdb4"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    let settings = { Power: 0, Temp: 25, Mode: 0, Fan: 0, Swing: 0 };
 
-    function sendCloud(val) {
-      db.ref('AirConStatus').set(val)
-        .then(() => {
-          console.log("Value set to " + val);
-        })
-        .catch((error) => {
-          console.error("Error setting value:", error);
-        });
+    function setVal(key, val) {
+      settings[key] = val;
+      db.ref('AC_Settings').set(settings);
+      // เพิ่ม Haptic Feedback จำลองให้มือถือสั่นเบาๆ เวลากดปุ่ม (ถ้า Browser รองรับ)
+      if (navigator.vibrate) navigator.vibrate(15); 
     }
 
-    // ฟังสถานะจาก Cloud แบบ Realtime เพื่ออัปเดตหน้าจอ
-    db.ref('AirConStatus').on('value', (snapshot) => {
-      const val = snapshot.val();
-      const statusText = document.getElementById('statusText');
-      if (val === 1) {
-        statusText.innerText = "Running (25°C)";
-        statusText.style.color = "var(--apple-green)";
-      } else {
-        statusText.innerText = "Standby / Off";
-        statusText.style.color = "var(--apple-red)";
-      }
-    }, (error) => {
-      document.getElementById('statusText').innerText = "Permission Denied (Check Rules)";
+    function adjustTemp(step) {
+      settings.Temp += step;
+      if(settings.Temp > 30) settings.Temp = 30;
+      if(settings.Temp < 18) settings.Temp = 18;
+      setVal('Temp', settings.Temp);
+    }
+
+    // อัปเดตหน้าจอแบบ Realtime ตามแสงและเงา Liquid Glass
+    db.ref('AC_Settings').on('value', (snapshot) => {
+      const data = snapshot.val();
+      if(!data) return;
+      settings = data;
+
+      document.getElementById('tempText').innerText = data.Temp + "°";
+      
+      const pwrBtn = document.getElementById('pwrBtn');
+      pwrBtn.innerText = data.Power ? "ON" : "OFF";
+      pwrBtn.className = data.Power ? "btn-rect pwr-on" : "btn-rect";
+      
+      const swBtn = document.getElementById('swBtn');
+      swBtn.innerText = data.Swing ? "ON" : "OFF";
+      swBtn.className = data.Swing ? "btn-rect active" : "btn-rect";
+
+      [0,1,2].forEach(i => document.getElementById('m'+i).className = (data.Mode==i) ? "btn-rect active" : "btn-rect");
+      [0,1,2,3].forEach(i => document.getElementById('f'+i).className = (data.Fan==i) ? "btn-rect active" : "btn-rect");
     });
   </script>
 </body>
